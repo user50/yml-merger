@@ -1,14 +1,20 @@
 package com.company;
 
 
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import javax.xml.bind.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 
 public class Util {
@@ -60,7 +66,22 @@ public class Util {
         return unmarshal(new FileInputStream(fileName), tClas, encoding);
     }
 
+    public static Document parseDocument(InputStream inputStream, String encoding) throws ParserConfigurationException, IOException, SAXException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature("http://xml.org/sax/features/validation", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        return builder.parse(new InputSource(inputStream));
+    }
 
 
+    public static void writeDocument(Document document, OutputStream outputStream, String encoding) throws TransformerException {
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
+        Result output = new StreamResult(outputStream);
+        Source input = new DOMSource(document);
+        transformer.transform(input, output);
 
+    }
 }
